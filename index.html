@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Voice to Bill</title>
+<style>
+:root{--g:#12a150;--b:#2563eb;--o:#f59e0b;--r:#e11d48;--p:#7c3aed}
+*{box-sizing:border-box}body{margin:0;font:16px/1.3 "Segoe UI",Nirmala UI,Latha,Gautami,Arial,sans-serif;background:#eef2ff;color:#1e293b}
+header{background:linear-gradient(90deg,#4f46e5,#7c3aed,#db2777);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+header b{font-size:19px}header small{opacity:.85;display:block;font-size:12px}header select{width:auto;padding:7px;font-weight:600}
+nav{display:flex;gap:6px;padding:8px;background:#fff}nav button{flex:1;padding:12px;border:0;border-radius:10px;background:#e0e7ff;font-size:16px;font-weight:700;color:#4338ca}
+nav button.on{background:linear-gradient(90deg,#4f46e5,#7c3aed);color:#fff}
+main{max-width:720px;margin:auto;padding:10px}.p{display:none}.p.on{display:block}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 6px #4f46e533;margin-bottom:10px;overflow:hidden}
+.h{padding:9px 12px;font-weight:700;color:#fff;background:linear-gradient(90deg,#0ea5e9,#2563eb);display:flex;justify-content:space-between;align-items:center}
+.h.c2{background:linear-gradient(90deg,#f59e0b,#ef4444)}.h.c3{background:linear-gradient(90deg,#10b981,#059669)}
+input,select{font:inherit;padding:10px;border:1px solid #c7d2fe;border-radius:8px;width:100%;background:#fff}
+button{font:inherit;cursor:pointer}.b{padding:10px 14px;border:0;border-radius:8px;background:var(--b);color:#fff;font-weight:700}
+.b.g{background:var(--g)}.b.r{background:var(--r)}.b.o{background:var(--o)}.b.pp{background:var(--p)}.b.s{padding:6px 10px;font-size:14px}
+#mic{width:100%;padding:16px;font-size:20px;border-radius:14px;border:0;background:linear-gradient(90deg,#12a150,#0d9488);color:#fff;font-weight:800;margin-bottom:8px}
+#mic.rec{background:linear-gradient(90deg,#e11d48,#f97316)}.row{display:flex;gap:6px;margin-bottom:8px}
+#msg{min-height:22px;margin:0 2px 8px;font-weight:600}.ok{color:var(--g)}.er{color:var(--r)}
+.it{display:flex;align-items:center;gap:8px;padding:9px 12px;border-top:1px solid #eef2ff}
+.av{width:38px;height:38px;border-radius:50%;color:#fff;display:grid;place-items:center;font-weight:800;flex:none}
+.it .n{flex:1;min-width:0}.it .n small{color:#64748b;display:block}.low{color:var(--r)!important;font-weight:700}
+.q{width:34px;height:34px;border-radius:50%;border:0;background:#e0e7ff;color:#4338ca;font-size:20px;font-weight:700}
+.tot{display:flex;justify-content:space-between;padding:12px;font-size:24px;font-weight:800;background:#fef3c7;color:#b45309}
+.sub{padding:4px 12px;color:#64748b;font-size:14px}.emp{padding:14px;text-align:center;color:#94a3b8}
+.f{padding:10px;display:none;gap:8px;grid-template-columns:1fr 1fr}.f.on{display:grid}.f .w{grid-column:1/3}.f label{font-size:13px;color:#64748b}
+#ov{display:none;position:fixed;inset:0;background:#0009;z-index:9;overflow:auto;padding:10px;justify-content:center}
+#inv{background:#fff;width:100%;max-width:640px;height:fit-content;border-radius:10px;overflow:hidden}
+.ih{background:linear-gradient(90deg,#4f46e5,#db2777);color:#fff;padding:14px}.ih input{background:none;border:0;color:#fff;font-size:22px;font-weight:800;padding:0}
+.ih div{display:flex;justify-content:space-between;font-size:14px;opacity:.95}
+table{width:100%;border-collapse:collapse;font-size:14px}th{background:#e0e7ff;color:#3730a3;padding:7px;text-align:left}td{padding:7px;border-bottom:1px solid #eef2ff}
+.r2{text-align:right}tr.t td{font-weight:700}tr.g td{background:#dcfce7;color:#166534;font-size:20px;font-weight:800}
+.ib{padding:10px;display:flex;gap:6px;flex-wrap:wrap;background:#f8fafc}.ib .b{flex:1}
+@media print{body>*:not(#ov){display:none!important}#ov{position:static;background:#fff;padding:0;display:block!important}#inv{max-width:none;border-radius:0}.nop{display:none!important}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<header><div><b>🛒 Voice to Bill</b><small data-i="sub"></small></div>
+<select id="lg" onchange="setL(this.value)"><option value="0">हिन्दी</option><option value="1">English</option><option value="2">தமிழ்</option><option value="3">తెలుగు</option></select></header>
+<nav><button id="t0" class="on" onclick="tab(0)" data-i="bill"></button><button id="t1" onclick="tab(1)" data-i="cat"></button><button id="t2" onclick="tab(2)" data-i="hist"></button></nav>
+<main>
+<div class="p on" id="p0">
+ <button id="mic" onclick="listen()"></button>
+ <div class="row"><input id="typed" placeholder="500 gram sugar" onkeydown="if(event.key=='Enter')go()"><button class="b" onclick="go()">OK</button></div>
+ <div id="msg"></div>
+ <div class="box"><div class="h"><span data-i="billh"></span><button class="b s r" onclick="cart={};draw()" data-i="clr"></button></div>
+  <div id="lines"></div><div class="sub" id="brk"></div><div class="tot"><span data-i="tot"></span><span id="tot"></span></div>
+  <div style="padding:10px"><button class="b g" style="width:100%;font-size:18px" onclick="openInv()" data-i="mk"></button></div></div>
+ <div class="box"><div class="h c2" data-i="lst"></div><div style="padding:8px"><input id="q0" data-p="srch" oninput="draw()"></div><div id="list0"></div></div>
+</div>
+<div class="p" id="p1">
+ <div class="box"><div class="h c3"><span data-i="newi"></span><button class="b s o" onclick="f1.classList.toggle('on')" data-i="addt"></button></div>
+  <div class="f" id="f1"><div class="w"><label data-i="nm"></label><input id="nn"></div><div class="w"><label data-i="al"></label><input id="na" placeholder="chini, cheeni, चीनी"></div>
+   <div><label data-i="sells"></label><select id="nu"><option value="kg" data-i="ukg"></option><option value="l" data-i="ul"></option><option value="pc" data-i="upc"></option></select></div>
+   <div><label data-i="rt"></label><input id="nr" type="number" inputmode="decimal"></div>
+   <div><label data-i="hv"></label><input id="ns" type="number" inputmode="decimal"></div>
+   <div><label data-i="gl"></label><input id="ng" type="number" value="0"></div>
+   <button class="b g w" onclick="addItem()" data-i="addc"></button></div></div>
+ <div class="box"><div class="h"><span data-i="catl"></span><span id="cnt"></span></div><div style="padding:8px"><input id="q1" data-p="srch" oninput="draw()"></div><div id="list1"></div></div>
+</div><div class="p" id="p2"><div class="box"><div class="h c2" data-i="hist"></div><div id="hl"></div></div></div></main>
+<div id="ov"><div id="inv"><div class="ih"><input id="shop" oninput="meta.shop=this.value;api('/api/meta',{shop:this.value})"><div><span><span data-i="invn"></span> #<span id="ino"></span></span><span id="idt"></span></div></div>
+ <div id="ibody"></div>
+ <div class="ib nop"><button class="b pp" onclick="prt()" data-i="prt"></button><button class="b g" onclick="done()" data-i="dn"></button><button class="b o" onclick="ov.style.display='none'" data-i="bk"></button></div></div></div>
+<script>
+const T={sub:["दुकान बिलिंग","Shop Billing","கடை பில்லிங்","షాప్ బిల్లింగ్"],bill:["🧾 बिल","🧾 Bill","🧾 பில்","🧾 బిల్లు"],cat:["📦 माल / कैटलॉग","📦 Stock / Catalogue","📦 சரக்கு / பட்டியல்","📦 సరుకు / కేటలాగ్"],
+mic:["🎤 बोलो","🎤 Speak","🎤 பேசுங்கள்","🎤 మాట్లాడండి"],lis:["🎧 सुन रहा हूँ...","🎧 Listening...","🎧 கேட்கிறேன்...","🎧 వింటున్నాను..."],
+hint:["बोलिए: 500 gram sugar, 2 kg rice","Say: 500 gram sugar, 2 kg rice","சொல்லுங்கள்: 500 gram sugar, 2 kg rice","చెప్పండి: 500 gram sugar, 2 kg rice"],
+billh:["बिल","Bill","பில்","బిల్లు"],clr:["साफ़","Clear","அழி","క్లియర్"],tot:["कुल","Total","மொத்தம்","మొత్తం"],mk:["✅ बिल बनाओ","✅ Make Bill","✅ பில் போடு","✅ బిల్లు చేయి"],
+lst:["सामान की सूची","Item List","பொருள் பட்டியல்","వస్తువుల జాబితా"],srch:["🔍 खोजो","🔍 Search","🔍 தேடு","🔍 వెతుకు"],none:["कुछ नहीं मिला","Nothing found","எதுவும் இல்லை","ఏమీ దొరకలేదు"],
+empty:["अभी कुछ नहीं जुड़ा","Nothing added yet","எதுவும் சேர்க்கவில்லை","ఏమీ చేర్చలేదు"],addb:["+ जोड़ो","+ Add","+ சேர்","+ చేర్చు"],left:["बचा","Left","மீதம்","మిగిలింది"],
+newi:["नया सामान","New Item","புதிய பொருள்","కొత్త వస్తువు"],addt:["➕ जोड़ो","➕ Add","➕ சேர்","➕ చేర్చు"],nm:["सामान का नाम","Item name","பொருள் பெயர்","వస్తువు పేరు"],
+sells:["बिकता है","Sold per","விற்பனை அலகு","అమ్మే యూనిట్"],rt:["भाव ₹ (1 यूनिट का)","Rate ₹ (per unit)","விலை ₹ (1 அலகு)","ధర ₹ (1 యూనిట్)"],hv:["कितना माल है","Stock quantity","இருப்பு அளவு","ఎంత సరుకు ఉంది"],
+gl:["GST % (पता नहीं तो 0)","GST % (0 if unsure)","GST % (தெரியாவிட்டால் 0)","GST % (తెలియకపోతే 0)"],addc:["✅ कैटलॉग में जोड़ो","✅ Add to catalogue","✅ பட்டியலில் சேர்","✅ కేటలాగ్‌లో చేర్చు"],
+catl:["कैटलॉग","Catalogue","பட்டியல்","కేటలాగ్"],itms:["सामान","items","பொருட்கள்","వస్తువులు"],stk:["स्टॉक","Stock","இருப்பு","స్టాక్"],
+ukg:["किलो","kg","கிலோ","కిలో"],ul:["लीटर","litre","லிட்டர்","లీటరు"],upc:["पीस","piece","எண்","ముక్క"],
+nq:["मात्रा नहीं मिली","Quantity not found","அளவு கிடைக்கவில்லை","పరిమాణం దొరకలేదు"],ni:["सामान नहीं मिला","Item not found","பொருள் இல்லை","వస్తువు దొరకలేదు"],
+sold:["में बिकता है","is sold per","விற்கும் அலகு","అమ్మే యూనిట్"],only:["सिर्फ़ बचा है","only left","மட்டுமே மீதம்","మాత్రమే మిగిలింది"],hd:["सुना","Heard","கேட்டது","విన్నది"],
+nv:["आवाज़ नहीं आई, फिर बोलो","Could not hear, try again","கேட்கவில்லை, மீண்டும் சொல்லுங்கள்","వినిపించలేదు, మళ్లీ చెప్పండి"],nb:["Chrome में खोलें, या नीचे लिखें","Use Chrome, or type below","Chrome-ல் திறக்கவும் அல்லது எழுதவும்","Chrome లో తెరవండి లేదా రాయండి"],
+rs:["का नया माल कितना आया?","new stock received?","புதிய சரக்கு எவ்வளவு?","కొత్త సరుకు ఎంత?"],rn:["का नया भाव","new rate","புதிய விலை","కొత్త ధర"],dl:["हटाना है?","Delete?","நீக்கவா?","తొలగించాలా?"],
+nr:["नाम और भाव लिखो","Enter name and rate","பெயர், விலை எழுதவும்","పేరు, ధర రాయండి"],ad:["कैटलॉग में जुड़ गया","added to catalogue","பட்டியலில் சேர்ந்தது","కేటలాగ్‌లో చేరింది"],
+invn:["बिल नं.","Invoice","பில் எண்","ఇన్వాయిస్"],it:["सामान","Item","பொருள்","వస్తువు"],qt:["मात्रा","Qty","அளவு","పరిమాణం"],rtc:["भाव","Rate","விலை","ధర"],am:["राशि","Amount","தொகை","మొత్తం"],
+sb:["उप-योग","Sub Total","துணை மொத்தம்","ఉప మొత్తం"],pay:["देय राशि","Amount Payable","செலுத்த வேண்டியது","చెల్లించవలసినది"],thx:["धन्यवाद! फिर आइए","Thank you! Visit again","நன்றி! மீண்டும் வருக","ధన్యవాదాలు! మళ్లీ రండి"],
+prt:["🖨 प्रिंट","🖨 Print","🖨 அச்சிடு","🖨 ప్రింట్"],dn:["✔ बिना प्रिंट पूरा","✔ Done (no print)","✔ அச்சிடாமல் முடி","✔ ప్రింట్ లేకుండా పూర్తి"],bk:["← वापस","← Back","← பின்","← వెనుకకు"],
+hist:["📜 पुराने बिल","📜 Old Bills","📜 பழைய பில்","📜 పాత బిల్లులు"],al:["दूसरे नाम (कॉमा से)","Other names (comma separated)","மற்ற பெயர்கள் (கமா)","ఇతర పేర్లు (కామాతో)"],alp:["दूसरे नाम लिखो (कॉमा से)","Other names (comma separated)","மற்ற பெயர்கள் (கமா)","ఇతర పేర్లు (కామాతో)"],
+fin:["बिल हो गया, स्टॉक कम हो गया","Bill done, stock updated","பில் முடிந்தது, இருப்பு குறைந்தது","బిల్లు పూర్తి, స్టాక్ తగ్గింది"]};
+const LC=["hi-IN","en-IN","ta-IN","te-IN"],KEY="v2b_shop",MK="v2b_meta";let S,cart={},snap=null,committed=false,meta={shop:"My Grocery Store",no:1,L:0};
+const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
+S={};meta=Object.assign(meta,ld(MK,{}));
+const api=(u,b)=>fetch(u,b?{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}:{}).then(r=>r.json());
+async function load(){S=await api("/api/items");const x=await api("/api/meta");meta.shop=x.shop;meta.no=x.no}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}},sm=()=>{try{localStorage.setItem(MK,JSON.stringify({L:meta.L}))}catch(e){}};
+const AL={chini:"sugar",cheeni:"sugar","चीनी":"sugar",chawal:"rice","चावल":"rice",tel:"oil","तेल":"oil",doodh:"milk","दूध":"milk",chai:"tea","चाय":"tea",aloo:"potato","आलू":"potato",noodles:"maggi","मैगी":"maggi"};
+const U={kg:["kg",1],kilo:["kg",1],kilogram:["kg",1],"किलो":["kg",1],"கிலோ":["kg",1],"కిలో":["kg",1],g:["kg",.001],gm:["kg",.001],gram:["kg",.001],grams:["kg",.001],"ग्राम":["kg",.001],"கிராம்":["kg",.001],"గ్రాము":["kg",.001],"గ్రాములు":["kg",.001],
+l:["l",1],litre:["l",1],liter:["l",1],"लीटर":["l",1],"லிட்டர்":["l",1],"లీటరు":["l",1],"లీటర్":["l",1],ml:["l",.001],pc:["pc",1],piece:["pc",1],packet:["pc",1],"पैकेट":["pc",1],dozen:["pc",12],"दर्जन":["pc",12]};
+const NW={one:1,two:2,three:3,four:4,five:5,ten:10,ek:1,"एक":1,"दो":2,"तीन":3,"चार":4,"पाँच":5,"पांच":5,"दस":10};
+const L=()=>+meta.L,t=k=>T[k][L()],$=id=>document.getElementById(id),un=u=>t({kg:"ukg",l:"ul",pc:"upc"}[u]);
+const f=n=>(+n.toFixed(3)).toString(),m=n=>"₹ "+n.toFixed(2);
+const col=s=>"hsl("+([...s].reduce((a,c)=>a*31+c.charCodeAt(0),7)%360)+",65%,45%)";
+function fq(q,u){if(u=="kg"&&q<1)return f(q*1000)+" g";if(u=="l"&&q<1)return f(q*1000)+" ml";return f(q)+" "+un(u)}
+function setL(v){meta.L=+v;sm();apply();draw()}
+function apply(){$("lg").value=L();document.documentElement.lang=["hi","en","ta","te"][L()];
+ document.querySelectorAll("[data-i]").forEach(e=>e.textContent=t(e.dataset.i));document.querySelectorAll("[data-p]").forEach(e=>e.placeholder=t(e.dataset.p));
+ $("mic").textContent=t("mic");$("nn").placeholder=t("nm");$("msg").textContent=t("hint");$("msg").className=""}
+function tab(n){[0,1,2].forEach(i=>{$("p"+i).classList.toggle("on",i==n);$("t"+i).classList.toggle("on",i==n)});if(n==2)hist()}
+function say(x,ok){$("msg").textContent=x;$("msg").className=ok?"ok":"er"}
+function norm(x){x=x.toLowerCase().replace(/,|।/g," , ").split(/\s+/).map(w=>NW[w]??w).join(" ");
+ return x.replace(/\b(half|aadha|adha)\b|आधा/g,"0.5").replace(/\bdedh\b|डेढ़/g,"1.5").replace(/\b(quarter|paav)\b|पाव/g,"0.25")}
+function find(s){s=s.trim();if(!s)return null;for(const k of Object.keys(S).sort((a,b)=>b.length-a.length))if(s.includes(k.toLowerCase()))return k;
+ for(const w of s.split(/\s+/))if(AL[w]&&S[AL[w]])return AL[w];return null}
+async function order(x){const r=await api("/api/parse",{text:x});for(const p of r){if(p.error=="nq")say(t("nq")+": "+p.ph);else if(p.error=="ni")say(t("ni")+": "+p.ph);else if(p.error=="sold")say(p.item+" "+t("sold")+" "+un(p.unit));else add(p.item,p.qty)}draw()}
+function add(i,q){const h=S[i].stock-(cart[i]||0);if(q>h+1e-9){say(i+": "+fq(h,S[i].unit)+" "+t("only"));return}
+ cart[i]=+((cart[i]||0)+q).toFixed(3);say("✅ "+i+" "+fq(q,S[i].unit),1)}
+function go(){if($("typed").value){order($("typed").value);$("typed").value=""}}
+function listen(){const R=window.SpeechRecognition||window.webkitSpeechRecognition,b=$("mic");
+ if(!R){say(t("nb"));return}const r=new R();r.lang=LC[L()];b.classList.add("rec");b.textContent=t("lis");
+ r.onresult=e=>{const x=e.results[0][0].transcript;say(t("hd")+": "+x,1);order(x)};r.onerror=()=>say(t("nv"));
+ r.onend=()=>{b.classList.remove("rec");b.textContent=t("mic")};r.start()}
+function calc(c){let s=0,g=0;for(const i in c){const a=c[i]*S[i].rate;s+=a;g+=a*S[i].gst/100}return[s,g,s+g]}
+function openInv(){if(!Object.keys(cart).length)return;const c={...cart},tt=calc(c),d=new Date();
+ snap={c,lines:Object.keys(c).map(i=>({i,q:c[i],u:S[i].unit,r:S[i].rate,g:S[i].gst})),tt};committed=false;
+ $("shop").value=meta.shop;$("ino").textContent=String(meta.no).padStart(4,"0");$("idt").textContent=d.toLocaleString();
+ $("ibody").innerHTML=`<table><tr><th>#</th><th>${t("it")}</th><th class=r2>${t("qt")}</th><th class=r2>${t("rtc")}</th><th class=r2>GST</th><th class=r2>${t("am")}</th></tr>`+
+ snap.lines.map((l,n)=>`<tr><td>${n+1}</td><td><b>${l.i}</b></td><td class=r2>${fq(l.q,l.u)}</td><td class=r2>₹${l.r}</td><td class=r2>${l.g}%</td><td class=r2>${(l.q*l.r).toFixed(2)}</td></tr>`).join("")+
+ `<tr class=t><td colspan=5 class=r2>${t("sb")}</td><td class=r2>${tt[0].toFixed(2)}</td></tr><tr class=t><td colspan=5 class=r2>GST</td><td class=r2>${tt[1].toFixed(2)}</td></tr>
+ <tr class=g><td colspan=4>${t("pay")}</td><td colspan=2 class=r2>${m(tt[2])}</td></tr></table><p style="text-align:center;color:#64748b">${t("thx")} 🙏</p>`;
+ ov.style.display="flex"}
+async function commit(){if(committed)return;committed=true;const r=await api("/api/bill",{lines:snap.c,shop:meta.shop});if(r.error){alert(r.error);committed=false;throw 0}snap.no=r.no;await load();cart={};draw()}
+async function prt(){try{await commit();setTimeout(()=>print(),100)}catch(e){}}
+async function done(){try{await commit();ov.style.display="none";say(t("fin"),1)}catch(e){}}
+function chg(i,d){const n=+((cart[i]||0)+d*(S[i].unit=="pc"?1:.5)).toFixed(3);if(n<=0)delete cart[i];else if(n<=S[i].stock)cart[i]=n;draw()}
+async function restock(i){const v=+prompt(i+" "+t("rs")+" ("+un(S[i].unit)+")");if(v>0){await api("/api/restock",{name:i,qty:v});await load();draw()}}
+async function rate(i){const v=+prompt(i+" "+t("rn")+" ₹ / "+un(S[i].unit),S[i].rate);if(v>0){await api("/api/rate",{name:i,rate:v});await load();draw()}}
+async function names(i){const v=prompt(t("alp"),(S[i].aliases||[]).join(", "));if(v!==null){await api("/api/aliases",{name:i,aliases:v});await load();draw()}}
+async function del(i){if(confirm(i+" "+t("dl"))){await api("/api/delete",{name:i});delete cart[i];await load();draw()}}
+async function addItem(){const n=$("nn").value.trim().toLowerCase(),r=+$("nr").value;if(!n||!r){alert(t("nr"));return}await api("/api/item",{name:n,unit:$("nu").value,rate:r,gst:+$("ng").value||0,stock:+$("ns").value||0,aliases:$("na").value});["nn","nr","ns","na"].forEach(k=>$(k).value="");$("f1").classList.remove("on");say(n+" "+t("ad"),1);await load();draw()}
+async function hist(){const b=await api("/api/bills");$("hl").innerHTML=b.map(x=>`<div class="it"><div class="n"><b>#${String(x.no).padStart(4,"0")}</b><small>${x.date} · ${x.shop}</small></div><b>${m(x.total)}</b><button class="b s pp" onclick="window.open('/bill/${x.no}?print=1')">🖨</button></div>`).join("")||`<div class="emp">${t("none")}</div>`}
+const av=i=>`<div class="av" style="background:${col(i)}">${i[0].toUpperCase()}</div>`,rows=q=>Object.keys(S).filter(i=>i.includes(q.toLowerCase())).sort();
+function draw(){const ks=Object.keys(cart),E=`<div class="emp">${t("none")}</div>`;
+ $("lines").innerHTML=ks.map(i=>`<div class="it">${av(i)}<div class="n"><b>${i}</b><small>${fq(cart[i],S[i].unit)} × ₹${S[i].rate}</small></div><b>${m(cart[i]*S[i].rate)}</b><button class="q" onclick="chg('${i}',-1)">−</button><button class="q" onclick="chg('${i}',1)">+</button></div>`).join("")||`<div class="emp">${t("empty")}</div>`;
+ const c=calc(cart);$("tot").textContent=m(c[2]);$("brk").textContent=c[0]?`${t("sb")} ${m(c[0])} + GST ${m(c[1])}`:"";
+ $("list0").innerHTML=rows($("q0").value).map(i=>`<div class="it">${av(i)}<div class="n"><b>${i}</b><small>₹${S[i].rate}/${un(S[i].unit)} · <span class="${S[i].stock<5?"low":""}">${t("left")} ${f(S[i].stock)}</span></small></div><button class="b s g" onclick="add('${i}',1);draw()">${t("addb")}</button></div>`).join("")||E;
+ $("cnt").textContent=Object.keys(S).length+" "+t("itms");
+ $("list1").innerHTML=rows($("q1").value).map(i=>`<div class="it">${av(i)}<div class="n"><b>${i}</b><small>₹${S[i].rate}/${un(S[i].unit)} · <span class="${S[i].stock<5?"low":""}">${t("stk")} ${f(S[i].stock)} ${un(S[i].unit)}${S[i].stock<5?" ⚠":""}</span></small><small>🏷 ${(S[i].aliases||[]).join(", ")}</small></div><button class="b s pp" onclick="names('${i}')">✎</button><button class="b s o" onclick="restock('${i}')">➕</button><button class="b s" onclick="rate('${i}')">₹</button><button class="b s r" onclick="del('${i}')">🗑</button></div>`).join("")||E}
+(async()=>{await load();apply();draw()})();
+</script></body></html>
